@@ -1,0 +1,26 @@
+docs/TROUBLESHOOTING.md
+  s_fd03b75d9c4286::t_d1c6757125a363 1-2,4-16,18-90
+  s_fd03b75d9c4286::t_3b6bba57b8ab6c 3,17
+docs/PUBLISHING.md
+  s_fd03b75d9c4286::t_3b6bba57b8ab6c 7,23,37,58,69,79,92,111
+  s_fd03b75d9c4286::t_d1c6757125a363 1-6,8-22,24-36,38-57,59-68,70-78,80-91,93-110,112-117,119-123
+  s_fd03b75d9c4286::t_f92e6554ad3acf 118
+README.md
+  s_fd03b75d9c4286::t_ed81a928a67142 1,3,5,7-8,10-15,17,19,21-24,26-30,32-34,36,38,40,42-47,49-50,52,54-57,61-64,67-70,72-74,78-86,88,94-95,99-100,103-107,109,111,113-119,123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "015684b532de14867f103fa1b3f2ed0ae35dd972",
+  "prompts": {},
+  "sessions": {
+    "s_fd03b75d9c4286": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ebd6b4c3-e99f-4a3e-8e9e-790772602ad2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Sebastian Messingfeld <sebastian@messeb.com>"
+    }
+  }
+}
