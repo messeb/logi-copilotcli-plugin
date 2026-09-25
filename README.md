@@ -4,15 +4,13 @@
 
 ### Copilot CLI for the MX Creative Keypad
 
+[![LinkedIn][linkedin-badge]][linkedin] [![Discord][discord-badge]][discord]
+
 Your GitHub Copilot CLI sessions, on three keys.<br>
 See what is working, what is waiting on you, and jump straight to the pane.
 
-[![CI](https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/ci.yml)
-[![Release](https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/release.yml/badge.svg)](https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/release.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](#requirements)
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
-[![Terminals](https://img.shields.io/badge/terminals-Warp%20%7C%20iTerm2-0A7EA4.svg)](#how-it-works)
+[![CI][ci-badge]][ci] [![Release][release-badge]][release] [![License][license-badge]][license]<br>
+[![Platform][platform-badge]](#requirements) [![.NET][dotnet-badge]][dotnet] [![Terminals][terminals-badge]](#how-it-works)
 
 </div>
 
@@ -121,3 +119,23 @@ opens a draft for you to attach the `.lplug4` to.
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
+
+<!-- badges -->
+[linkedin]: https://to.messeb.com/contact
+[discord]: https://discord.com/users/376434056306360320
+[ci]: https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/ci.yml
+[release]: https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/release.yml
+[license]: LICENSE
+[dotnet]: https://dotnet.microsoft.com/download/dotnet/10.0
+
+[discord-badge]: https://img.shields.io/badge/Discord-messeb-5865F2?style=flat-square&logo=discord&logoColor=white
+[ci-badge]: https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/ci.yml/badge.svg?style=flat-square
+[release-badge]: https://github.com/messeb/logi-copilotcli-plugin/actions/workflows/release.yml/badge.svg?style=flat-square
+[license-badge]: https://img.shields.io/badge/license-MIT-blue?style=flat-square
+[platform-badge]: https://img.shields.io/badge/platform-macOS-lightgrey?style=flat-square&logo=apple&logoColor=white
+[dotnet-badge]: https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet&logoColor=white
+[terminals-badge]: https://img.shields.io/badge/terminals-Warp%20%7C%20iTerm2-0A7EA4?style=flat-square
+
+<!-- LinkedIn is not in simple-icons any more, so shields renders no icon for logo=linkedin.
+     The glyph is supplied inline instead, which is why this one URL is long. -->
+[linkedin-badge]: https://img.shields.io/badge/LinkedIn-messingfeld-0A66C2?style=flat-square&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0yMC40NDcgMjAuNDUyaC0zLjU1NHYtNS41NjljMC0xLjMyOC0uMDI3LTMuMDM3LTEuODUyLTMuMDM3LTEuODUzIDAtMi4xMzYgMS40NDUtMi4xMzYgMi45Mzl2NS42NjdIOS4zNTFWOWgzLjQxNHYxLjU2MWguMDQ2Yy40NzctLjkgMS42MzctMS44NSAzLjM3LTEuODUgMy42MDEgMCA0LjI2NyAyLjM3IDQuMjY3IDUuNDU1djYuMjg2ek01LjMzNyA3LjQzM2MtMS4xNDQgMC0yLjA2My0uOTI2LTIuMDYzLTIuMDY1IDAtMS4xMzguOTItMi4wNjMgMi4wNjMtMi4wNjMgMS4xNCAwIDIuMDY0LjkyNSAyLjA2NCAyLjA2MyAwIDEuMTM5LS45MjUgMi4wNjUtMi4wNjQgMi4wNjV6bTEuNzgyIDEzLjAxOUgzLjU1NVY5aDMuNTY0djExLjQ1MnpNMjIuMjI1IDBIMS43NzFDLjc5MiAwIDAgLjc3NCAwIDEuNzI5djIwLjU0MkMwIDIzLjIyNy43OTIgMjQgMS43NzEgMjRoMjAuNDUxQzIzLjIgMjQgMjQgMjMuMjI3IDI0IDIyLjI3MVYxLjcyOUMyNCAuNzc0IDIzLjIgMCAyMi4yMjUgMHoiLz48L3N2Zz4%3D
