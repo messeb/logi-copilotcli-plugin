@@ -40,9 +40,9 @@ tree, then ran one `copilot -p` prompt.
 
 - User-level hooks load from `$COPILOT_HOME/hooks/*.json`, default `~/.copilot/hooks/`. Each
   file is independent, so install is *write one file* and uninstall is *delete one file*. No
-  merge into a shared settings file. This is a real improvement over Claude Code, where the
-  reference plugin had to do JSON surgery on `~/.claude/settings.json` shared with two other
-  plugins.
+  merge into a shared settings file. That matters: where an agent CLI keeps all hooks in one
+  shared settings file, a plugin has to do JSON surgery on a file other tools are editing too,
+  and unpick exactly its own entries on uninstall.
 - Seven of the eight registered events fire in this order for a tool-using turn:
   `userPromptSubmitted`, `sessionStart`, `preToolUse`, `permissionRequest`, `postToolUse`,
   `agentStop`, `sessionEnd`. The eighth, `notification`, fires only when the agent actually

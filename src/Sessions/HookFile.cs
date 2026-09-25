@@ -16,9 +16,9 @@ namespace Loupedeck.CopilotCLIPlugin.Sessions
         /// <summary>
         /// The events the tiles are built from.
         ///
-        /// camelCase, which is Copilot CLI's own spelling. The PascalCase aliases exist for VS Code
-        /// compatibility and carry Claude-format matcher semantics - a translation layer there is
-        /// no reason to stand on when writing a file from scratch.
+        /// camelCase, which is Copilot CLI's own spelling. Copilot also accepts PascalCase
+        /// aliases for editor compatibility, but those carry a different matcher dialect - a
+        /// translation layer there is no reason to stand on when writing a file from scratch.
         /// </summary>
         public static readonly IReadOnlyList<String> Events = new[]
         {

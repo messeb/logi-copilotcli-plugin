@@ -10,8 +10,9 @@ namespace Loupedeck.CopilotCLIPlugin.Sessions
     ///
     /// Copilot CLI loads every <c>*.json</c> under <c>$COPILOT_HOME/hooks/</c> independently, so
     /// this plugin owns exactly one file and never edits anything a user or another tool wrote.
-    /// That is a real difference from the Claude Code equivalent, which has to merge entries into a
-    /// shared <c>settings.json</c> and unpick them again on uninstall.
+    /// That is worth having: an agent CLI that keeps its hooks in one shared settings file forces
+    /// a plugin to merge entries in and unpick them again on uninstall, and to get that right while
+    /// other tools are editing the same file.
     ///
     /// Installing is not done at load: writing into a user's Copilot configuration is a change they
     /// should ask for, so it takes a confirmed double press on the Set up key.
