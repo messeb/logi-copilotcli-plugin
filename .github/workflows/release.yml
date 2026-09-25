@@ -43,7 +43,7 @@ jobs:
           ref: main
           fetch-depth: 0        # tags and history, for the tag check and the notes
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
