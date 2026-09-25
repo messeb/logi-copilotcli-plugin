@@ -31,7 +31,7 @@ namespace Loupedeck.CopilotCLIPlugin
                 Loupedeck.PluginStatus.Error,
                 "macOS blocked the plugin from controlling iTerm. Allow Logi Plugin Service under "
                 + "System Settings > Privacy & Security > Automation, then press the tile again.",
-                "https://github.com/messeb/copilotcli-keypad-mx#known-limits",
+                "https://github.com/messeb/logi-copilotcli-plugin#known-limits",
                 "How to fix this");
 
             // Everything written here stays inside the plugin's own directory. It deliberately does
@@ -46,7 +46,7 @@ namespace Loupedeck.CopilotCLIPlugin
                 this.OnPluginStatusChanged(
                     Loupedeck.PluginStatus.Warning,
                     "Not connected to Copilot CLI yet. Open either folder and press Set up twice.",
-                    "https://github.com/messeb/copilotcli-keypad-mx#setup",
+                    "https://github.com/messeb/logi-copilotcli-plugin#setup",
                     "How to connect");
             }
             else

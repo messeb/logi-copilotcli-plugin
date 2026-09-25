@@ -17,7 +17,7 @@ reviewer is most likely to ask about.
 ## What is blocking submission
 
 **The three public URLs do not resolve.** `homePageUrl`, `supportPageUrl` and `licenseUrl` all
-point at `github.com/messeb/copilotcli-keypad-mx`, which does not exist; the repository has never
+point at `github.com/messeb/logi-copilotcli-plugin`, which does not exist; the repository has never
 been pushed and has no remote. Review rejects dead links, and the Developer Agreement separately
 requires the EULA to be reachable at a URL.
 

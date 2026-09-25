@@ -9,8 +9,8 @@ description: |
 
 pluginFileName: CopilotCLIPlugin.dll
 version: 1.0.0
-author: messeb
-copyright: Copyright © 2026 messeb. All rights reserved.
+author: Sebastian Messingfeld
+copyright: Copyright © 2026 Sebastian Messingfeld. All rights reserved.
 
 # macOS only, and the metadata has to say so: approval checks that the claimed operating system
 # support matches reality. Session focus goes through warp://session deep links, /usr/bin/open and
@@ -36,9 +36,9 @@ minimumLoupedeckVersion: 6.4
 # MIT is the grant; the Marketplace Developer Agreement separately requires the developer to supply
 # an EULA naming themselves as licensor, so licenseUrl points at that rather than a generic MIT page.
 license: MIT
-licenseUrl: https://github.com/messeb/copilotcli-keypad-mx/blob/main/docs/EULA.md
+licenseUrl: https://github.com/messeb/logi-copilotcli-plugin/blob/main/docs/EULA.md
 
 # Shown in Options+ and the Marketplace. Without homePageUrl, Options+ falls back to loupedeck.com,
 # which tells a user nothing about where this plugin came from.
-homePageUrl: https://github.com/messeb/copilotcli-keypad-mx
-supportPageUrl: https://github.com/messeb/copilotcli-keypad-mx/issues
+homePageUrl: https://github.com/messeb/logi-copilotcli-plugin
+supportPageUrl: https://github.com/messeb/logi-copilotcli-plugin/issues

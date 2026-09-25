@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-This End User Licence Agreement ("Agreement") is between you and messeb ("Licensor") for the
+This End User Licence Agreement ("Agreement") is between you and Sebastian Messingfeld ("Licensor") for the
 CopilotCLI plugin ("Software").
 
 ## 1. Licence
