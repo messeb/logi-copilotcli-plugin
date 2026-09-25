@@ -1,0 +1,44 @@
+version: 2
+
+updates:
+  # NuGet lives only in the test project: the plugin itself takes no package references, because
+  # everything it needs comes from PluginApi.dll, which the host provides at load time.
+  - package-ecosystem: nuget
+    directory: /tests/CopilotCLI.Tests
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Minor and patch arrive as one pull request. They are routine, CI is the whole review, and
+      # five separate PRs a week for that is noise.
+      dotnet-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    # Majors are deliberately left out of the group, so each gets its own pull request. A major on a
+    # test framework can change how failures are reported or how tests are discovered, and that
+    # deserves to be looked at on its own rather than buried in a batch.
+
+  # The workflows pin actions by major tag; this is what moves those pins.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    labels: [dependencies, ci]
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      github-actions-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    # Same reasoning: a major on actions/checkout or actions/setup-dotnet has changed default
+    # behaviour before now, so it comes through on its own.

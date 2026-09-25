@@ -220,7 +220,7 @@ setup
 fire_iterm sessionStart 1000000000000 "w0t0p0:$ITERM_GUID"
 fire_iterm agentStop   1000000001000 "w0t1p0:$ITERM_GUID"
 check "a moved pane stays one session" "1" \
-    "$(ls "$ROOT/sessions" 2>/dev/null | grep -c state.json | tr -d ' ')"
+    "$(find "$ROOT/sessions" -name '*.state.json' 2>/dev/null | wc -l | tr -d ' ')"
 check "and keeps its state" "done" "$(field "$ROOT/sessions/$ITERM_KEY.state.json" state)"
 teardown
 
@@ -235,18 +235,18 @@ teardown
 for bad in "w0t0p0:" "w0t0p0:not-a-guid" "w0t0p0:../../etc/passwd" "no-colon-at-all"; do
     setup
     fire_iterm sessionStart 1000000000000 "$bad"
-    check "rejects ITERM_SESSION_ID '$bad'" "0" "$(ls "$ROOT/sessions" 2>/dev/null | wc -l | tr -d ' ')"
+    check "rejects ITERM_SESSION_ID '$bad'" "0" "$(find "$ROOT/sessions" -type f 2>/dev/null | wc -l | tr -d ' ')"
     teardown
 done
 
 echo "identity guards"
 setup
 fire sessionStart 1000000000000 ""
-check "no Warp UUID: writes nothing" "0" "$(ls "$ROOT/sessions" 2>/dev/null | wc -l | tr -d ' ')"
+check "no Warp UUID: writes nothing" "0" "$(find "$ROOT/sessions" -type f 2>/dev/null | wc -l | tr -d ' ')"
 teardown
 setup
 fire sessionStart 1000000000000 "../../etc/passwd"
-check "path traversal in UUID rejected" "0" "$(ls "$ROOT/sessions" 2>/dev/null | wc -l | tr -d ' ')"
+check "path traversal in UUID rejected" "0" "$(find "$ROOT/sessions" -type f 2>/dev/null | wc -l | tr -d ' ')"
 teardown
 # Case is normalised rather than rejected: iTerm spells its GUIDs in uppercase, and one rule has
 # to serve both terminals. What the guard actually protects is the FILENAME, which is derived from
@@ -258,7 +258,7 @@ check "uppercase is folded, not rejected" "yes" \
 teardown
 setup
 fire sessionStart 1000000000000 "abc"
-check "short UUID rejected" "0" "$(ls "$ROOT/sessions" 2>/dev/null | wc -l | tr -d ' ')"
+check "short UUID rejected" "0" "$(find "$ROOT/sessions" -type f 2>/dev/null | wc -l | tr -d ' ')"
 teardown
 
 echo "metadata"

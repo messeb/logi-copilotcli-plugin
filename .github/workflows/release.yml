@@ -1,0 +1,147 @@
+name: Release
+
+# Manual only. Tags main at its current commit and opens a GitHub Release for it.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Check everything and report, but create no tag and no release'
+        type: boolean
+        default: false
+      draft:
+        description: 'Create the release as a draft, so the .lplug4 can be attached before it is public'
+        type: boolean
+        default: true
+
+# Two releases at once would race for the same tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  release:
+    name: Tag and release
+    runs-on: macos-latest      # the hook suite is part of the gate, and it belongs on macOS
+    steps:
+      # Releases are cut from main and nowhere else. Running this on a branch would tag a commit
+      # that main does not contain.
+      - name: Refuse anything but main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Release runs from main only; this was ${{ github.ref }}"
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0        # tags and history, for the tag check and the notes
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # The manifest owns the version. Nothing else needs bumping, and nothing may disagree with it.
+      - name: Read the version
+        id: version
+        run: |
+          version=$(sed -n 's/^version:[[:space:]]*//p' src/package/metadata/LoupedeckPackage.yaml | tr -d '\r')
+          if [ -z "$version" ]; then
+            echo "::error::no version in src/package/metadata/LoupedeckPackage.yaml"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$version"
+
+      # The version is the thing a human forgets to bump. An existing tag says exactly that, and
+      # says it before anything has been created.
+      - name: Refuse a version that was already released
+        run: |
+          tag='${{ steps.version.outputs.tag }}'
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::$tag already exists - bump version in src/package/metadata/LoupedeckPackage.yaml"
+            exit 1
+          fi
+
+      - name: Unit tests
+        run: dotnet test tests/CopilotCLI.Tests/CopilotCLI.Tests.csproj --configuration Release
+
+      - name: Hook tests
+        run: sh tests/hook/run-tests.sh
+
+      - name: shellcheck
+        run: |
+          brew list shellcheck >/dev/null 2>&1 || brew install shellcheck
+          shellcheck -s sh hooks/keypad-hook.sh tests/hook/run-tests.sh tools/package.sh
+
+      # Unlike CI, this is fatal. A release is what users and Marketplace reviewers follow links
+      # from, and the Developer Agreement requires the EULA to be reachable.
+      - name: Public links must resolve
+        run: |
+          set -u
+          fail=0
+          for url in $(grep -Eo 'https://[^ ]+' src/package/metadata/LoupedeckPackage.yaml); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$url" || echo 000)
+            printf '%s %s\n' "$code" "$url"
+            case "$code" in 2*|3*) ;; *) fail=1; echo "::error::$url returned $code" ;; esac
+          done
+          exit $fail
+
+      - name: Dry run stops here
+        if: inputs.dry_run
+        run: |
+          echo "Dry run: everything checked, ${{ steps.version.outputs.tag }} NOT created."
+
+      - name: Tag main
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a '${{ steps.version.outputs.tag }}' -m 'CopilotCLI ${{ steps.version.outputs.version }}'
+          git push origin '${{ steps.version.outputs.tag }}'
+
+      # The .lplug4 is deliberately not built here. It needs PluginApi.dll from a local Logi Plugin
+      # Service install, which is not redistributable and is on no hosted runner - so the release is
+      # created as a draft by default and the package is attached from a machine that can build it:
+      #
+      #   ./tools/package.sh
+      #   gh release upload <tag> bin/CopilotCLI_<version>.lplug4
+      - name: Create the release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # --generate-notes works out the previous tag by itself, including on a first release
+          # where there is none.
+          gh release create '${{ steps.version.outputs.tag }}' \
+            --title 'CopilotCLI ${{ steps.version.outputs.version }}' \
+            --target main \
+            --generate-notes \
+            ${{ inputs.draft && '--draft' || '' }}
+
+      - name: What to do next
+        if: ${{ !inputs.dry_run }}
+        run: |
+          {
+            echo "### CopilotCLI ${{ steps.version.outputs.version }}"
+            echo
+            echo "Tag \`${{ steps.version.outputs.tag }}\` created on main."
+            echo
+            echo "The \`.lplug4\` is **not** attached: it needs \`PluginApi.dll\` from a local Logi"
+            echo "Plugin Service install, which no hosted runner has. From a machine that can build:"
+            echo
+            echo '```sh'
+            echo './tools/package.sh'
+            echo 'gh release upload ${{ steps.version.outputs.tag }} bin/CopilotCLI_$(echo ${{ steps.version.outputs.version }} | tr . _).lplug4'
+            echo '```'
+            echo
+            echo "Then publish the draft, and upload the same file at"
+            echo "<https://marketplace.logitech.com/contribute>."
+          } >> "$GITHUB_STEP_SUMMARY"

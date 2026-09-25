@@ -71,6 +71,9 @@ esac
 
 mkdir -p "$SESSIONS" 2>/dev/null || exit 0
 # Refuse a root another local user created before we could.
+#
+# shellcheck disable=SC3067  # `test -O` is outside POSIX, but this script only ever runs on macOS,
+# where /bin/sh provides it. Dropping the check would be worse than the portability note.
 [ -O "$ROOT" ] || exit 0
 chmod 700 "$ROOT" 2>/dev/null
 
@@ -154,14 +157,14 @@ if [ "$EVENT" = "notification" ]; then
 fi
 
 case "$EVENT" in
-    sessionStart)        STATE=idle ;;
-    userPromptSubmitted) STATE=busy ;;
-    preToolUse)          STATE=busy ;;
-    postToolUse)         STATE=busy ;;
-    permissionRequest)   STATE=busy ;;
-    notification)        STATE=attention ;;
-    agentStop)           STATE=done ;;
-    *)                   STATE=done ;;
+    sessionStart)        STATE='idle' ;;
+    userPromptSubmitted) STATE='busy' ;;
+    preToolUse)          STATE='busy' ;;
+    postToolUse)         STATE='busy' ;;
+    permissionRequest)   STATE='busy' ;;
+    notification)        STATE='attention' ;;
+    agentStop)           STATE='done' ;;
+    *)                   STATE='done' ;;
 esac
 
 # Elapsed time is "how long in THIS state", so the clock only restarts when the state actually
@@ -174,7 +177,15 @@ fi
 
 write_atomic() {  # write_atomic <file> <content>
     _t="$1.tmp.$$"
-    printf '%s\n' "$2" > "$_t" 2>/dev/null && mv -f "$_t" "$1" 2>/dev/null || rm -f "$_t" 2>/dev/null
+
+    # Written whole, then renamed over the target, so a reader can never catch a half-written file.
+    # Spelled as if/then rather than `A && B || C` so the cleanup path is unambiguous: the temp file
+    # is removed whenever either step failed, and never after a successful rename.
+    if printf '%s\n' "$2" > "$_t" 2>/dev/null && mv -f "$_t" "$1" 2>/dev/null; then
+        return 0
+    fi
+
+    rm -f "$_t" 2>/dev/null
 }
 
 write_atomic "$STATE_FILE" "{\"state\":\"$STATE\",\"since\":$SINCE,\"ts\":$NOW,\"event_ms\":$EVENT_MS}"

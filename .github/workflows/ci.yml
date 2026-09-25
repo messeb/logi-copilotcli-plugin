@@ -1,0 +1,153 @@
+name: CI
+
+# Pull requests, and every push to main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A second push to the same branch makes the first run irrelevant. Never cancel on main, where the
+# run is the record of what that commit did.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+
+jobs:
+  # The plugin assembly itself is deliberately NOT built here, and cannot be: it references
+  # PluginApi.dll, which ships inside Logi Plugin Service and is not redistributable, so no hosted
+  # runner has it. What IS covered is every file that carries logic - those are kept free of
+  # PluginApi types on purpose, and the test project links them in rather than referencing the
+  # plugin. If a PluginApi type ever creeps into one of them, this job stops compiling, which is
+  # exactly the signal wanted.
+  dotnet-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/CopilotCLI.Tests/CopilotCLI.Tests.csproj
+
+      - name: Test
+        run: >
+          dotnet test tests/CopilotCLI.Tests/CopilotCLI.Tests.csproj
+          --configuration Release
+          --no-restore
+          --logger 'trx;LogFileName=results.trx'
+          --results-directory artifacts/test-results
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: artifacts/test-results
+          if-no-files-found: warn
+
+  # keypad-hook.sh only ever runs on macOS - it is invoked by Copilot CLI sessions there - so it is
+  # tested there, on the shell it will actually meet.
+  hook-tests:
+    name: Hook tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the hook suite
+        run: sh tests/hook/run-tests.sh
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck
+        run: shellcheck -s sh hooks/keypad-hook.sh tests/hook/run-tests.sh tools/package.sh
+
+      - name: Python tools compile
+        run: python3 -m compileall -q tools
+
+  # Catches the packaging mistakes that get a Marketplace submission rejected, without needing to
+  # build anything: the manifest is the source of truth for the version and the public URLs, and a
+  # dead link is the most common avoidable rejection.
+  manifest:
+    name: Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required fields, and rules the Marketplace enforces
+        run: |
+          python3 - <<'PY'
+          import re, sys
+
+          text = open("src/package/metadata/LoupedeckPackage.yaml").read()
+
+          def field(name):
+              m = re.search(rf"^{name}:\s*(.+)$", text, re.M)
+              return m.group(1).strip() if m else None
+
+          problems = []
+          for required in ("type", "name", "displayName", "version", "author",
+                           "supportPageUrl", "license", "licenseUrl", "pluginFileName"):
+              if not field(required):
+                  problems.append(f"missing required field: {required}")
+
+          name = field("name") or ""
+          if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
+              problems.append(f"name {name!r} must match [a-zA-Z0-9_-]+")
+          if name.endswith("Plugin"):
+              problems.append(f"name {name!r} must not end in 'Plugin'")
+
+          version = field("version") or ""
+          if not re.fullmatch(r"\d+\.\d+(\.\d+)?", version):
+              problems.append(f"version {version!r} must be major.minor[.build]")
+
+          licence = (field("license") or "").lower()
+          if "gpl" in licence:
+              problems.append("GPL licences are rejected by the Marketplace")
+
+          for line in problems:
+              print(f"::error::{line}")
+          sys.exit(1 if problems else 0)
+          PY
+
+      - name: Icon is present and exactly 256x256
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          import sys
+          from PIL import Image
+          path = "src/package/metadata/Icon256x256.png"
+          image = Image.open(path)
+          if image.size != (256, 256):
+              print(f"::error::{path} is {image.size}, must be (256, 256)")
+              sys.exit(1)
+          print(f"{path} {image.size} {image.mode}")
+          PY
+
+      # Advisory on a pull request, because a link can be temporarily down and that is not the
+      # contributor's fault. The release workflow checks the same links and does fail on them.
+      - name: Public links resolve
+        continue-on-error: true
+        run: |
+          set -u
+          fail=0
+          for url in $(grep -Eo 'https://[^ ]+' src/package/metadata/LoupedeckPackage.yaml); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$url" || echo 000)
+            printf '%s %s\n' "$code" "$url"
+            case "$code" in 2*|3*) ;; *) fail=1; echo "::warning::$url returned $code" ;; esac
+          done
+          exit $fail

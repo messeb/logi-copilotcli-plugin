@@ -312,6 +312,31 @@ the primary sources are the SDK's
 page and the
 [Marketplace Approval Guidelines](https://logitech.github.io/actions-sdk-docs/marketplace-approval-guidelines/).
 
+## CI
+
+| Workflow | Runs on | Does |
+|---|---|---|
+| `ci.yml` | pull request, push to `main` | unit tests (ubuntu), hook tests (macOS), shellcheck + `compileall`, and a manifest check for the rules the Marketplace enforces |
+| `release.yml` | manual (`workflow_dispatch`) | re-runs the gate, tags `main` from the manifest's version and opens a draft release |
+
+Dependabot watches NuGet and the workflows' actions: minor and patch updates arrive grouped as one
+pull request a week, majors individually.
+
+**CI cannot build the plugin.** `PluginApi.dll` ships inside Logi Plugin Service, is not
+redistributable, and is on no hosted runner — so `dotnet build src/CopilotCLIPlugin.csproj` and
+`./tools/package.sh` only work on a machine with Options+ installed. That is why the test project
+links the PluginApi-free source files instead of referencing the plugin: everything carrying logic
+stays testable anywhere, and a PluginApi type creeping into one of those files breaks the test
+build immediately, which is the intended signal.
+
+For the same reason the release workflow creates the release as a **draft** and does not attach the
+`.lplug4`. Build and attach it from a machine that can:
+
+```sh
+./tools/package.sh
+gh release upload v1.0.0 bin/CopilotCLI_1_0_0.lplug4
+```
+
 ## Tests
 
 ```sh
