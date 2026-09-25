@@ -16,6 +16,10 @@ See what is working, what is waiting on you, and jump straight to the pane.
 
 ---
 
+| Inactive | Active | Selected |
+|:--:|:--:|:--:|
+| <img src="docs/images/keypad-inactive.jpg" width="240" alt="Keypad with no sessions running"> | <img src="docs/images/keypad-active.jpg" width="240" alt="A session folder open on the keypad"> | <img src="docs/images/keypad-selected.jpg" width="240" alt="Keypad showing one waiting session"> |
+
 Run three or four Copilot CLI sessions at once and you get one of two failure modes: you sit
 watching a session that has been busy for four minutes, or a session waits for you while you work
 somewhere else and nobody notices. A keypad fixes both, because it is glanceable without stealing
