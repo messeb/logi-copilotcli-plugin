@@ -1,0 +1,44 @@
+type: plugin4
+
+name: CopilotCLI
+displayName: Copilot CLI
+description: |
+  Three keys for your GitHub Copilot CLI sessions: how many are working, how many are waiting on
+  you, and how many are open at all. Each opens a folder listing those sessions; press a tile to
+  jump straight to that terminal pane. Works with Warp and iTerm2.
+
+pluginFileName: CopilotCLIPlugin.dll
+version: 1.0.0
+author: messeb
+copyright: Copyright © 2026 messeb. All rights reserved.
+
+# macOS only, and the metadata has to say so: approval checks that the claimed operating system
+# support matches reality. Session focus goes through warp://session deep links, /usr/bin/open and
+# osascript, none of which exist on Windows. Omitting pluginFolderWin is how the package declares
+# that.
+pluginFolderMac: bin
+
+# The keypad only. Everything here is a grid of session tiles you read and press; the Dialpad has
+# too few keys and the Actions Ring is not somewhere to read a project name off a tile.
+supportedDevices:
+    - MxCreativeKeypad
+
+# A status display is for watching sessions WHILE working somewhere else, so it must not be bound
+# to an application - an application profile would switch away the moment you focused the terminal.
+# This has to agree with Plugin.HasNoApplication.
+pluginCapabilities:
+    - HasNoApplication
+
+# 6.4 is the first Logi Plugin Service on the .NET 10 runtime; this net10.0 DLL will not load on
+# the older .NET 8 based services.
+minimumLoupedeckVersion: 6.4
+
+# MIT is the grant; the Marketplace Developer Agreement separately requires the developer to supply
+# an EULA naming themselves as licensor, so licenseUrl points at that rather than a generic MIT page.
+license: MIT
+licenseUrl: https://github.com/messeb/copilotcli-keypad-mx/blob/main/docs/EULA.md
+
+# Shown in Options+ and the Marketplace. Without homePageUrl, Options+ falls back to loupedeck.com,
+# which tells a user nothing about where this plugin came from.
+homePageUrl: https://github.com/messeb/copilotcli-keypad-mx
+supportPageUrl: https://github.com/messeb/copilotcli-keypad-mx/issues

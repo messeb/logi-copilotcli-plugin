@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Loupedeck.CopilotCLIPlugin</RootNamespace>
+    <AssemblyName>CopilotCLIPlugin</AssemblyName>
+
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <!-- net10.0 is not a choice: the installed PluginApi.dll is a .NET 10 assembly, so a net8.0
+         build cannot reference it. That is also why minimumLoupedeckVersion is 6.4 - the first
+         Logi Plugin Service on the .NET 10 runtime. -->
+    <PluginApiDir Condition="$(OS) != 'Windows_NT'">/Applications/Utilities/LogiPluginService.app/Contents/MonoBundle/</PluginApiDir>
+    <PluginDir Condition="$(OS) != 'Windows_NT'">$(HOME)/Library/Application Support/Logi/LogiPluginService/Plugins/</PluginDir>
+
+    <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\bin\'))</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\bin\</OutputPath>
+
+    <PluginShortName>CopilotCLI</PluginShortName>
+  </PropertyGroup>
+
+  <!-- A shipped package should carry the plugin and nothing else. Debug symbols are useful in the
+       dev loop and are just weight (and a little source-path disclosure) inside a .lplug4. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- The hook script travels inside the DLL, not beside it. A Marketplace user never has this
+       repository, and the package directory is removed when the plugin is uninstalled, so the
+       assembly is the only place it can live and still be extractable. -->
+  <ItemGroup>
+    <EmbeddedResource Include="../hooks/keypad-hook.sh" LogicalName="Loupedeck.CopilotCLIPlugin.keypad-hook.sh" />
+  </ItemGroup>
+
+  <!-- Private=false is load-bearing. The template copies PluginApi.dll to the output by default,
+       and a package that ships it fails with a bare "Cannot load plugin from '<path>.dll'".
+       Neither of the shipping first-party plugins ships it either. -->
+  <ItemGroup>
+    <Reference Include="PluginApi">
+      <HintPath>$(PluginApiDir)PluginApi.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyPackage" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <PackageFiles Include="package\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PackageFiles)" DestinationFolder="$(OutputPath)..\%(RecursiveDir)" />
+    <Message Text="package metadata copied to $(OutputPath)..\" Importance="High" />
+  </Target>
+
+  <!-- A .link file pointing at the build output is how the service loads a plugin from source
+       without installing it, which is the whole dev loop. -->
+  <Target Name="LinkAndReload" AfterTargets="PostBuildEvent" Condition="$(OS) != 'Windows_NT'">
+    <Exec Command="mkdir -p &quot;$(PluginDir)&quot; &amp;&amp; echo $(BaseOutputPath)$(Configuration)/ &gt; &quot;$(PluginDir)$(PluginShortName).link&quot;" />
+    <Message Text="plugin link written to $(PluginDir)$(PluginShortName).link" Importance="High" />
+
+    <Exec Command="open loupedeck:plugin/$(PluginShortName)/reload" ContinueOnError="true" />
+    <Message Condition="'$(MSBuildLastTaskResult)' == 'false'"
+             Text="could not reload the plugin - restart Logi Plugin Service manually" Importance="High" />
+  </Target>
+
+  <Target Name="PluginClean" AfterTargets="CoreClean" Condition="$(OS) != 'Windows_NT'">
+    <Exec Command="rm -f &quot;$(PluginDir)$(PluginShortName).link&quot;" ContinueOnError="true" />
+    <RemoveDir Directories="$(OutputPath)..\" />
+  </Target>
+
+</Project>

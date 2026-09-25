@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Loupedeck.CopilotCLIPlugin.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Source is linked in, not project-referenced: the plugin assembly needs PluginApi.dll, which
+       cannot be loaded in a test host. Only the files that are free of PluginApi types appear
+       here, which is also what keeps that separation honest - adding a PluginApi type to one of
+       these files breaks the test build immediately. -->
+  <ItemGroup>
+    <Compile Include="../../src/Sessions/SessionSnapshot.cs" Link="Sessions/SessionSnapshot.cs" />
+    <Compile Include="../../src/Sessions/SessionClassifier.cs" Link="Sessions/SessionClassifier.cs" />
+    <Compile Include="../../src/Sessions/SessionFiles.cs" Link="Sessions/SessionFiles.cs" />
+    <Compile Include="../../src/Sessions/HookFile.cs" Link="Sessions/HookFile.cs" />
+    <Compile Include="../../src/Rendering/TextMetrics.cs" Link="Rendering/TextMetrics.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>
