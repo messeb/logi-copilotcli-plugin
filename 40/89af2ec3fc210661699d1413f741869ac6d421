@@ -1,0 +1,20 @@
+README.md
+  s_fd03b75d9c4286::t_7e1e821e29bf69 7,12-13,122-141
+  s_fd03b75d9c4286::t_1216eb9aada0e3 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4089af2ec3fc210661699d1413f741869ac6d421",
+  "prompts": {},
+  "sessions": {
+    "s_fd03b75d9c4286": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ebd6b4c3-e99f-4a3e-8e9e-790772602ad2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Sebastian Messingfeld <sebastian@messeb.com>"
+    }
+  }
+}
